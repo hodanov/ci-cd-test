@@ -1,0 +1,11 @@
+version: 3
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.13
+    working_directory: /go/src/github.com/hodanov/ci-cd-test
+    steps:
+      - checkout
+      - run: go get -v -t -d ./...
+      # テストコードを書いていれば`go test`でテストが実行され、エラーが出ればジョブが失敗する。
+      - run: go test -v ./...
