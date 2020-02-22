@@ -38,6 +38,6 @@ jobs:
             TAG=gcr.io/ci-cd-test-12345/go-web-server:pushed-`date +%Y%m%d%H%M%S`
             docker image tag go-web-server $TAG
             docker image push $TAG
-            LATEST_TAG=grc.io/ci-cd-test-12345/go-web-server:latest
+            LATEST_TAG=gcr.io/ci-cd-test-12345/go-web-server:latest
             docker image tag go-web-server $LATEST_TAG
             docker image push $LATEST_TAG
