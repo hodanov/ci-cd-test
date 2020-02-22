@@ -34,7 +34,7 @@ jobs:
       - run:
           name: Push docker image
           command: |
-            docker image build -t go-web-server .
+            docker image build -t go-web-server -f ./df-go.dockerfile .
             TAG=gcr.io/ci-cd-test-12345/go-web-server:pushed-`date +%Y%m%d%H%M%S`
             docker image tag go-web-server $TAG
             docker image push $TAG
