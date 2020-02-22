@@ -1,11 +1,43 @@
+# version: 2
+# jobs:
+#   build:
+#     docker:
+#       - image: circleci/golang:1.13
+#     working_directory: /go/src/github.com/hodanov/ci-cd-test
+#     steps:
+#       - checkout
+#       - run: go get -v -t -d ./...
+#       # テストコードを書いていれば`go test`でテストが実行され、エラーが出ればジョブが失敗する。
+#       - run: go test -v ./...
+#
 version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/golang:1.13
     working_directory: /go/src/github.com/hodanov/ci-cd-test
+    docker:
+      - image: google/cloud-sdk
     steps:
       - checkout
-      - run: go get -v -t -d ./...
-      # テストコードを書いていれば`go test`でテストが実行され、エラーが出ればジョブが失敗する。
-      - run: go test -v ./...
+      # ↓CircleCI上でdocker、docker-composeコマンドを利用するための設定
+      - setup_remote_docker:
+        version: 18.06.0-ce
+      - run:
+          name: Setup CLOUD SDK
+          command: |
+            # CircleCIの環境変数に登録したサービスアカウントの値を`echo`して`gcloud auth`に渡す。
+            # `gcloud auth ... --key-file=-`はCLOUD SDKの認証にサービスアカウントを利用するための設定
+            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ci-cd-test-12345
+            gcloud --quiet config set compute/zone asia-east1-b
+            # ↓dockerのCredential helpersを利用。GCRなどのDocker Registry向けの認証を`docker login`コマンドなしで提供できるようにする設定
+            gcloud --quiet auth configure-docker
+      - run:
+          name: Push docker image
+          command: |
+            docker image build -t go-web-server .
+            TAG=gcr.io/ci-cd-test-12345/go-web-server:pushed-`date +%Y%m%d%H%M%S`
+            docker image tag go-web-server $TAG
+            docker image push $TAG
+            LATEST_TAG=grc.io/ci-cd-test-12345/go-web-server:latest
+            docker image tag go-web-server $LATEST_TAG
+            docker image push $LATEST_TAG
