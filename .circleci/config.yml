@@ -17,6 +17,7 @@ jobs:
     docker:
       - image: google/cloud-sdk
     steps:
+      # ↓GitHubのブランチにあるファイルを取得して後続のstepで参照するためのコマンド
       - checkout
       # ↓CircleCI上でdocker、docker-composeコマンドを利用するための設定
       - setup_remote_docker:
